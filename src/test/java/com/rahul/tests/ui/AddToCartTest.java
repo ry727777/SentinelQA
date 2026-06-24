@@ -28,6 +28,5 @@ public class AddToCartTest extends BaseTest {
         Assert.assertTrue(result, "Add to cart failed");
 
         logger.info("Validate Add to cart testing");
-
     }
 }
