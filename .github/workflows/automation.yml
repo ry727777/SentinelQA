@@ -1,15 +1,3 @@
-# GitHub Actions Workflow for SentinelQA Test Automation Framework
-#
-# This workflow automates:
-# - Compilation of Java code with Maven
-# - Execution of UI and API tests using TestNG
-# - Artifact collection of test reports and logs
-# - Environment-based secret management
-#
-# Triggers:
-# - Push events to 'main' branch
-# - Pull requests targeting 'main' branch
-# - Manual execution via workflow_dispatch
 
 name: SentinelQA Test Automation
 
@@ -40,6 +28,28 @@ env:
   MAVEN_VERSION: '3.8.7'
   # Temurin JDK provider for reliable Java installation
   JDK_VENDOR: 'temurin'
+
+# ============================================================================
+# PERMISSIONS: Limit workflow permissions for security
+# ============================================================================
+# Note: Individual jobs can override these permissions as needed
+permissions:
+  # Read-only access to repository contents
+  contents: read
+  # Write permission for GitHub Pages deployment
+  pages: write
+  # Token permission for GitHub Pages
+  id-token: write
+
+# ============================================================================
+# CONCURRENCY: Prevent multiple workflow runs on GitHub Pages
+# ============================================================================
+# This ensures only one deployment happens at a time to GitHub Pages
+concurrency:
+  # Group deployments by "pages" to ensure only one at a time
+  group: "pages"
+  # Cancel in-progress deployments when a new one starts
+  cancel-in-progress: true
 
 # ============================================================================
 # JOBS: Define the work to be executed
@@ -249,10 +259,78 @@ jobs:
           echo "2. Check Allure HTML report for detailed insights" >> $GITHUB_STEP_SUMMARY
           echo "3. Check logs for detailed error information" >> $GITHUB_STEP_SUMMARY
 
-# ============================================================================
-# PERMISSIONS: Limit workflow permissions for security
-# ============================================================================
-permissions:
-  contents: read
-  # Allow writing artifacts (test reports)
-  actions: read
+  # ========================================================================
+  # Job 2: Deploy Allure Report to GitHub Pages
+  # ========================================================================
+  # This job deploys the Allure HTML report to GitHub Pages for easy viewing
+  # Requirements:
+  # - GitHub Pages must be enabled in repository settings
+  # - Deploy from 'gh-pages' branch (auto-created by actions/deploy-pages)
+  # - Runs after test-automation job completes
+  deploy-report:
+    name: 🚀 Deploy Allure Report
+    
+    # Wait for test-automation job to complete before running
+    needs: test-automation
+    
+    # Run even if test-automation has failures (always deploy report for analysis)
+    if: always()
+    
+    # Use latest Ubuntu runner
+    runs-on: ubuntu-latest
+    
+    # ====================================================================
+    # PERMISSIONS: Required to deploy to GitHub Pages
+    # ====================================================================
+    permissions:
+      # Write permission for GitHub Pages
+      pages: write
+      # Token for GitHub Pages deployment
+      id-token: write
+    
+    # ====================================================================
+    # ENVIRONMENT: Configure GitHub Pages deployment environment
+    # ====================================================================
+    environment:
+      # Deploy to github-pages environment
+      name: github-pages
+      # URL where the report will be accessible
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    # ====================================================================
+    # STEPS: Deploy Allure report to GitHub Pages
+    # ====================================================================
+    steps:
+      # ====================================================================
+      # Step 1: Download Allure HTML Report Artifact
+      # ====================================================================
+      - name: 📥 Download Allure HTML Report
+        uses: actions/download-artifact@v4
+        with:
+          # Use the artifact name from test-automation job
+          name: allure-html-report-${{ github.run_id }}
+          # Download to ./site (GitHub Pages root directory)
+          path: ./site
+      
+      # ====================================================================
+      # Step 2: Configure GitHub Pages
+      # ====================================================================
+      - name: ⚙️ Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      
+      # ====================================================================
+      # Step 3: Upload Pages Artifact
+      # ====================================================================
+      - name: 📤 Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Path containing the static site to deploy
+          # GitHub will use this to deploy to github-pages branch
+          path: ./site
+      
+      # ====================================================================
+      # Step 4: Deploy to GitHub Pages
+      # ====================================================================
+      - name: 🌐 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
