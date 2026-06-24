@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="SentinelQA Test Suite" parallel="false" thread-count="1">
+    <listeners>
+        <listener class-name="com.rahul.tests.listeners.TestListener"/>
+    </listeners>
+
+    <test name="UI Tests">
+        <classes>
+            <class name="com.rahul.tests.ui.LoginTest"/>
+            <class name="com.rahul.tests.ui.LogoutTest"/>
+            <class name="com.rahul.tests.ui.AddToCartTest"/>
+        </classes>
+    </test>
+
+    <test name="API Tests">
+        <classes>
+            <class name="com.rahul.tests.api.AuthApiTest"/>
+            <class name="com.rahul.tests.api.UserApiTest"/>
+        </classes>
+    </test>
+</suite>
