@@ -101,16 +101,26 @@ jobs:
             ${{ runner.os }}-maven-
 
       # ====================================================================
-      # Step 4: Configure environment variable for API keys
+      # Step 4: Configure environment variables for API keys
+      # ====================================================================
+      # These secrets must be configured in GitHub repository settings:
+      # Settings → Secrets and variables → Actions → New repository secret
       # ====================================================================
       - name: 🔑 Configure Environment Variables
         run: |
-          # Export OPENAI_API_KEY from GitHub repository secret
-          # This allows the Java application to access it via System.getenv("OPENAI_API_KEY")
-          # The secret is securely injected by GitHub Actions and not exposed in logs
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
-          # Verify environment is properly set (will not print the actual key for security)
-          echo "✓ Environment variables configured successfully"
+          # Export GEMINI_API_KEY from GitHub repository secret
+          # Maps to OPENAI_API_KEY secret for backward compatibility
+          # Java apps can access via: System.getenv("GEMINI_API_KEY")
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
+          
+          # Export REQRES_API_KEY from GitHub repository secret
+          # For REST API testing with ReqRes service
+          # Java apps can access via: System.getenv("REQRES_API_KEY")
+          echo "REQRES_API_KEY=${{ secrets.REQRES_API_KEY }}" >> $GITHUB_ENV
+          
+          # Verify environment variables are configured (without printing sensitive values)
+          echo "✓ GEMINI_API_KEY configured"
+          echo "✓ REQRES_API_KEY configured"
 
       # ====================================================================
       # Step 5: Display Java and Maven versions (diagnostic information)
