@@ -3,6 +3,7 @@ target/
 .m2/
 *.jar
 *.war
+/.allure
 
 # IDE
 .idea/
