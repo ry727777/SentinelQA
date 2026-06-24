@@ -14,7 +14,7 @@ public class LoginPage {
     private static final Logger logger = LoggerUtil.getLogger(LoginPage.class);
     private final WebDriver driver;
 
-    private By username = By.id("username"); // change back to user-name
+    private By username = By.id("user-name"); // change back to user-name
     private By password = By.id("password");
     private By  loggingBtn = By.id("login-button");
 
