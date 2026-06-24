@@ -28,8 +28,14 @@ public class BaseTest {
 
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
-        options.addArguments("--remote-allow-origins=*");
+        if (System.getenv("CI") != null) {
+            options.addArguments("--headless=new");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--window-size=1920,1080");
+        } else {
+            options.addArguments("--start-maximized");
+        }
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(ConfigReader.getIntProperty("ui.timeout")));
