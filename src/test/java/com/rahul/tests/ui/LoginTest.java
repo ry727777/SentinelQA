@@ -31,7 +31,7 @@ public class LoginTest extends BaseTest {
         loginpage.login(user_name, password);
 
         String curr_url = driver.getCurrentUrl();
-        Assert.assertTrue(curr_url.contains("inventory"), "Login failed");
+        Assert.assertTrue(curr_url.contains("inventor"), "Login failed"); // inventory -> inventor.
 
         logger.info("Testing valid login");
     }
